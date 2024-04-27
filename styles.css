@@ -1,0 +1,39 @@
+/* Style the chart container */
+#bubbleChart, #barChart, #donutChart {
+    width: 800px;
+    height: 600px;
+    margin: 20px auto; /* Center the chart */
+}
+
+/* Style the bubbles */
+.bubble {
+    fill-opacity: 0.7;
+    stroke-width: 1px;
+    stroke: black;
+}
+
+/* Style the bubble labels */
+.label {
+    font-family: sans-serif;
+    font-size: 14px;
+    fill: #333;
+}
+
+/* Style the bars */
+.bar {
+    fill: steelblue;
+}
+
+/* Style the legend */
+.legend {
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+.legend rect {
+    fill: steelblue;
+}
+
+.legend text {
+    fill: black;
+}

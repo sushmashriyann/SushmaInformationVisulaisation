@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information visualisation Group Project - Group 1</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Information Block */
+        .information-block {
+            background-color: #003976;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1.5mm solid #eaab00;
+            font-family: "NationalBold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-variant-numeric: lining-nums;
+            text-shadow: inherit;
+            line-height: 120%;
+        }
+
+        .logo {
+            margin-right: 20px;
+            width: 225px;
+            height: 100px;
+        }
+
+        /* Form Container */
+        .form-container {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2.text-center {
+            font-family: 'NationalBold', "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-variant-numeric: lining-nums;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #003976;
+            font-size: 2.1875rem;
+        }
+
+        .form-control {
+            border-radius: 0;
+        }
+
+        .btn {
+          background-color: #eaab00;
+          border-color: #eaab00;
+          font-family: Arial, sans-serif;
+          font-weight: bold;
+          width: 500px;
+          display: flex;
+          align-items: center; /* Center vertically */
+          justify-content: center; /* Center horizontally */
+        }
+
+        .btn:hover {
+            background-color: #e59400;
+            border-color: #e59400;
+        }
+
+        .footer-section {
+            background-color: #003976;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            border-top: 1.5mm solid #eaab00;
+            font-family: "NationalBold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-variant-numeric: lining-nums;
+            text-shadow: inherit;
+            line-height: 130%;
+            color: #fff;
+            position: absolute;
+            /* margin-top: 250px; /* Adjust as needed */
+            width: 100%;
+        }
+
+        .contact-info {
+            margin-left: auto;
+        }
+
+        .container {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        .menu-container {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 120px;
+            margin-top: 150px;
+            position: relative;
+            margin-left: auto; /* Center horizontally */
+            margin-right: auto; /* Center horizontally */
+        }
+
+        .menu-item {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="information-block">
+        <img src="logoBlueBG.jpg" alt="Logo" class="logo">
+        <div>
+            <p><strong>Subject:</strong> Information Visualisation</p>
+            <p><strong>Group:</strong> Group 1</p>
+            <p><strong>Assignment:</strong> Programming with D3.js</p>
+        </div>
+    </div>
+
+    <div class="menu-container">
+      <div class="text-center"> <!-- Center the heading -->
+        <h2 class="text-center">Mutual Funds Visualization</h2>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+          <a href="bubbleChart.html" class="menu-item" target="_blank">Bubble Chart</a>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+          <a href="barChart.html" class="menu-item" target="_blank">Bar Chart</a>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+          <a href="donutChart.html" class="menu-item" target="_blank">Donut Chart</a>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="footer-section">
+        <div class="contact-info">Members: <a href="mailto:sshriyan@kent.edu">Sushma Anand Shriyan, </a><a href="mailto:ajcourtn@kent.edu">Andrew Courtney, </a><a href="mailto:tnguye69@kent.edu">Thu Nguyen, </a><a href="mailto:dearley2@kent.edu">Daniel Earley </a></div>
+    </div>
+</div>
+
+</body>
+</html>
