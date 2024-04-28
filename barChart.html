@@ -82,6 +82,20 @@
         .contact-info {
             margin-left: auto;
         }
+
+        /* Back Button */
+        .back-button {
+            background-color: #eaab00;
+            color: #003976;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -95,6 +109,9 @@
     </div>
 </div>
 
+<!-- Back Button -->
+<button class="back-button" onclick="goBack()">Back</button>
+
 <!-- Main Content - Bar Chart -->
 <div class="chart-container">
     <h2 class="text-center">Bar Chart</h2>
@@ -107,9 +124,15 @@
 </div>
 
 <!-- Bar Chart Script -->
-
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="barChart.js"></script>
+
+<script>
+    // Function to go back to menu.html
+    function goBack() {
+        window.location.href = "menu.html";
+    }
+</script>
 
 </body>
 </html>

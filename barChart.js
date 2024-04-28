@@ -35,7 +35,6 @@ d3.csv("mutualfunds.csv").then((data) => {
     .attr("width", width)
     .attr("height", height);
 
-
   // Create X and Y scales
   const x = d3.scaleBand()
     .domain(categoryAverages.map((d) => d.Category))
@@ -58,40 +57,40 @@ d3.csv("mutualfunds.csv").then((data) => {
     .selectAll("line")
     .attr("stroke", (d) => (d === 0) ? "black" : "gainsboro"); // Set zero line color to black
   
-// Create grouped bars for each time period
-const timePeriods = Object.keys(timePeriodColors);
-timePeriods.forEach((timePeriod, i) => {
-  svg.selectAll(".bar-" + timePeriod)
-    .data(categoryAverages)
-    .enter()
-    .append("rect")
-    .attr("class", "bar-" + timePeriod)
-    .attr("x", (d) => x(d.Category) + x.bandwidth() * (i / timePeriods.length))
-    .attr("y", (d) => (d[timePeriod] >= 0) ? y(d[timePeriod]) : y(0))
-    .attr("width", x.bandwidth() / timePeriods.length)
-    .attr("height", (d) => Math.abs(y(d[timePeriod]) - y(0)))
-    .attr("fill", timePeriodColors[timePeriod])
-    .on("mouseover", function (event, d) {
-      // Show value, category, and type on hover
-      const value = d[timePeriod].toFixed(2); // Format value to 2 decimal places
-      const category = d.Category;
-      const type = timePeriod;
-      const xPosition = width / 2; // Position tooltip in the middle
-      const yPosition = padding; // Position tooltip at the top
-      svg.append("text")
-        .attr("class", "bar-label")
-        .attr("x", xPosition)
-        .attr("y", yPosition -5)
-        .text(`${category} (${type}): ${value}`)
-        .style("fill", "black")
-        .style("font-size", "12px")
-        .style("text-anchor", "middle");
-    })
-    .on("mouseout", function () {
-      // Remove label when not hovering
-      svg.selectAll(".bar-label").remove();
-    });
-});
+  // Create grouped bars for each time period
+  const timePeriods = Object.keys(timePeriodColors);
+  timePeriods.forEach((timePeriod, i) => {
+    svg.selectAll(".bar-" + timePeriod)
+      .data(categoryAverages)
+      .enter()
+      .append("rect")
+      .attr("class", "bar-" + timePeriod)
+      .attr("x", (d) => x(d.Category) + x.bandwidth() * (i / timePeriods.length))
+      .attr("y", (d) => (d[timePeriod] >= 0) ? y(d[timePeriod]) : y(0))
+      .attr("width", x.bandwidth() / timePeriods.length)
+      .attr("height", (d) => Math.abs(y(d[timePeriod]) - y(0)))
+      .attr("fill", timePeriodColors[timePeriod])
+      .on("mouseover", function (event, d) {
+        // Show value, category, and type on hover
+        const value = d[timePeriod].toFixed(2); // Format value to 2 decimal places
+        const category = d.Category;
+        const type = timePeriod;
+        const xPosition = width / 2; // Position tooltip in the middle
+        const yPosition = padding; // Position tooltip at the top
+        svg.append("text")
+          .attr("class", "bar-label")
+          .attr("x", xPosition)
+          .attr("y", yPosition -5)
+          .text(`${category} (${type}): ${value}`)
+          .style("fill", "black")
+          .style("font-size", "12px")
+          .style("text-anchor", "middle");
+      })
+      .on("mouseout", function () {
+        // Remove label when not hovering
+        svg.selectAll(".bar-label").remove();
+      });
+  });
 
   // Add X and Y axes
   svg.append("g")
@@ -106,21 +105,20 @@ timePeriods.forEach((timePeriod, i) => {
   const legend = svg.append("g")
     .attr("transform", `translate(${width - padding}, ${padding})`);
 
+  Object.entries(timePeriodColors).forEach(([timePeriod, color], i) => {
+    legend.append("rect")
+      .attr("x", 0)
+      .attr("y", i * 20)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", color);
 
-      Object.entries(timePeriodColors).forEach(([timePeriod, color], i) => {
-        legend.append("rect")
-          .attr("x", 0)
-          .attr("y", i * 20)
-          .attr("width", 15)
-          .attr("height", 15)
-          .attr("fill", color);
-    
-        legend.append("text")
-          .attr("x", 20)
-          .attr("y", i * 20 + 12)
-          .text(timePeriod);
-      });
-    
-      // Set the text color to black
-      d3.selectAll("text").style("fill", "black");
-    });
+    legend.append("text")
+      .attr("x", 20)
+      .attr("y", i * 20 + 12)
+      .text(timePeriod);
+  });
+
+  // Set the text color to black
+  d3.selectAll("text").style("fill", "black");
+});
