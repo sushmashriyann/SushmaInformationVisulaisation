@@ -1,0 +1,12 @@
+C:\Users\sushm>cd C:\Users\sushm\Downloads\IV_Project
+
+C:\Users\sushm\Downloads\IV_Project>python -m http.server
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+::1 - - [27/Apr/2024 15:22:14] "GET /index.html HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:14] "GET /styles.css HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:14] "GET /donutChart.js HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:14] "GET /bubbleChart.js HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:14] "GET /barChart.js HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:15] "GET /mutualfunds.csv HTTP/1.1" 200 -
+::1 - - [27/Apr/2024 15:22:15] code 404, message File not found
+::1 - - [27/Apr/2024 15:22:15] "GET /favicon.ico HTTP/1.1" 404 -
