@@ -1,96 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D3.js Dashboard with Interactive Filters</title>
-<!-- Load D3.js library -->
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-/* Add your CSS styles here */
-.back-button {
-    background-color: #eaab00;
-    color: #003976;
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin-top: 10px;
-    cursor: pointer;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js Dashboard with Interactive Filters</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Add your CSS styles here */
+        .back-button {
+            background-color: #eaab00;
+            color: #003976;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
 
-#dashboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
+        #dashboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
 
-/* Adjustments for individual charts */
-#barChart,
-#bubbleChart,
-#donutChart {
-  margin-top: 20px; /* Adjust as needed */
-}
+        /* Adjustments for individual charts */
+        #barChart,
+        #bubbleChart,
+        #donutChart,
+        #treeMapChart {
+            margin-top: 20px; /* Adjust as needed */
+        }
 
-.tooltip {
-  position: absolute;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  pointer-events: none;
-}
-</style>
+        .tooltip {
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
-<div id="filters">
-  <!-- Add interactive filters here -->
-  <label for="categoryFilter">Category:</label>
-  <select id="categoryFilter" class="filter">
-    <option value="All">All Categories</option>
-    <!-- Dynamically populate options from the data -->
-  </select>
-</div>
 <div id="dashboard">
-  <!-- Middle Container -->
-  <div id="middleContainer" class="middle-container">
-    <!-- Back Button -->
-    <button class="back-button" onclick="goBack()">Back</button>
-  </div>
-  <div id="barChart"></div>
-  <div id="bubbleChart"></div>
-  <div id="donutChart"></div>
+    
+    <!-- Middle Container -->
+    <div id="middleContainer" class="middle-container">
+        <!-- Back Button -->
+        <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+    <div id="barChart"></div>
+    <div id="bubbleChart"></div>
+    <div id="donutChart"></div>
+    <div id="treeMapChart"></div> <!-- New div for the tree map -->
 </div>
+
 <script>
-// Load the mutual funds data asynchronously
-d3.csv("mutualfunds.csv").then(function(data) {
-  // Data preprocessing and visualization code
-  var barChartData = data;
+    // Load the mutual funds data asynchronously
+    Promise.all([
+        d3.csv("mutualfunds.csv"),
+        d3.csv("mutualfunds.csv") // Load data for the tree map separately
+    ]).then(function(data) {
+        // Data preprocessing and visualization code
+        var barChartData = data[0];
+        var bubbleChartData = data[1]; // Data for the bubble chart
+        var treeMapData = data[0]; // Data for the tree map
 
-  // Populate dropdown options
-  var categoryDropdown = d3.select("#categoryFilter");
-  var categories = Array.from(new Set(barChartData.map(function(d) { return d.Category; }))); // Get unique categories
-  categories.sort(); // Sort categories alphabetically
-  categoryDropdown.selectAll("option")
-    .data(categories)
-    .enter().append("option")
-    .text(function(d) { return d; });
-
-  // Add event listener to filter dropdown
-  categoryDropdown.on("change", function() {
-    var selectedCategory = this.value;
-    var filteredData = selectedCategory === "All" ? barChartData : barChartData.filter(function(d) { return d.Category === selectedCategory; });
-    updateBarChart(filteredData);
-    updateDonutChart(filteredData);
-    updateBubbleChart(filteredData);
-  });
-
-  // Define function to update bar chart
-  function updateBarChart(data) {
+       // Define function to update bar chart
+function updateBarChart(data) {
     // Remove any existing SVG elements
     d3.select("#barChart").select("svg").remove();
 
@@ -104,302 +86,559 @@ d3.csv("mutualfunds.csv").then(function(data) {
 
     // Calculate average values for each category and time period
     const categoryAverages = Array.from(groupedData, ([category, values]) => ({
-      Category: category,
-      YTD: d3.mean(values, (d) => +d.YTD),
-      MO3: d3.mean(values, (d) => +d.MO3),
-      YR1: d3.mean(values, (d) => +d.YR1),
-      YR3: d3.mean(values, (d) => +d.YR3),
-      YR5: d3.mean(values, (d) => +d.YR5),
-      YR10: d3.mean(values, (d) => +d.YR10),
+        Category: category,
+        YTD: d3.mean(values, (d) => +d.YTD),
+        MO3: d3.mean(values, (d) => +d.MO3),
+        YR1: d3.mean(values, (d) => +d.YR1),
+        YR3: d3.mean(values, (d) => +d.YR3),
+        YR5: d3.mean(values, (d) => +d.YR5),
+        YR10: d3.mean(values, (d) => +d.YR10),
     }));
 
     // Define colors for each time period
     const timePeriodColors = {
-      YTD: "#e12729", //Red
-      MO3: "#238ad4", //Blue
-      YR1: "#f8cc1b", //Yellow
-      YR3: "#72b043", //Green
-      YR5: "#f37324", //Orange
-      YR10: "#A569BD", //Lavender
+        YTD: "#e12729", //Red
+        MO3: "#238ad4", //Blue
+        YR1: "#f8cc1b", //Yellow
+        YR3: "#72b043", //Green
+        YR5: "#f37324", //Orange
+        YR10: "#A569BD", //Lavender
     };
 
     // Create the SVG element inside the div with ID "barChart"
     const svg = d3.select("#barChart")
-      .append("svg") // Create the SVG element
-      .attr("width", width)
-      .attr("height", height);
+        .append("svg") // Create the SVG element
+        .attr("width", width)
+        .attr("height", height);
 
     // Create X and Y scales
     const x = d3.scaleBand()
-      .domain(categoryAverages.map((d) => d.Category))
-      .range([padding, width - padding])
-      .padding([0.2]);
+        .domain(categoryAverages.map((d) => d.Category))
+        .range([padding, width - padding])
+        .padding([0.2]);
 
     const y = d3.scaleLinear()
-      .domain([
-        d3.min(categoryAverages, (d) => d3.min([d.YTD, d.MO3, d.YR1, d.YR3, d.YR5, d.YR10])),
-        d3.max(categoryAverages, (d) => d3.max([d.YTD, d.MO3, d.YR1, d.YR3, d.YR5, d.YR10]))
-      ])
-      .nice()
-      .range([height - padding, padding]);
+        .domain([
+            d3.min(categoryAverages, (d) => d3.min([d.YTD, d.MO3, d.YR1, d.YR3, d.YR5, d.YR10])),
+            d3.max(categoryAverages, (d) => d3.max([d.YTD, d.MO3, d.YR1, d.YR3, d.YR5, d.YR10]))
+        ])
+        .nice()
+        .range([height - padding, padding]);
 
     // Add grid lines (behind bars)
     svg.append("g")
-      .attr("class", "grid")
-      .attr("transform", `translate(${padding},0)`)
-      .call(d3.axisLeft(y).tickSize(-width + 2 * padding).tickFormat(""))
-      .selectAll("line")
-      .attr("stroke", (d) => (d === 0) ? "black" : "gainsboro"); // Set zero line color to black
-    
+        .attr("class", "grid")
+        .attr("transform", `translate(${padding},0)`)
+        .call(d3.axisLeft(y).tickSize(-width + 2 * padding).tickFormat(""))
+        .selectAll("line")
+        .attr("stroke", (d) => (d === 0) ? "black" : "gainsboro"); // Set zero line color to black
+
     // Create grouped bars for each time period
     const timePeriods = Object.keys(timePeriodColors);
     timePeriods.forEach((timePeriod, i) => {
-      svg.selectAll(".bar-" + timePeriod)
-        .data(categoryAverages)
-        .enter()
-        .append("rect")
-        .attr("class", "bar-" + timePeriod)
-        .attr("x", (d) => x(d.Category) + x.bandwidth() * (i / timePeriods.length))
-        .attr("y", (d) => (d[timePeriod] >= 0) ? y(d[timePeriod]) : y(0))
-        .attr("width", x.bandwidth() / timePeriods.length)
-        .attr("height", (d) => Math.abs(y(d[timePeriod]) - y(0)))
-        .attr("fill", timePeriodColors[timePeriod])
-        .on("mouseover", function (event, d) {
-          // Show value, category, and type on hover
-          const value = d[timePeriod].toFixed(2); // Format value to 2 decimal places
-          const category = d.Category;
-          const type = timePeriod;
-          const xPosition = width / 2; // Position tooltip in the middle
-          const yPosition = padding; // Position tooltip at the top
-          svg.append("text")
-            .attr("class", "bar-label")
-            .attr("x", xPosition)
-            .attr("y", yPosition -5)
-            .text(`${category} (${type}): ${value}`)
-            .style("fill", "black")
-            .style("font-size", "12px")
-            .style("text-anchor", "middle");
-        })
-        .on("mouseout", function () {
-          // Remove label when not hovering
-          svg.selectAll(".bar-label").remove();
-        });
+        svg.selectAll(".bar-" + timePeriod)
+            .data(categoryAverages)
+            .enter()
+            .append("rect")
+            .attr("class", "bar-" + timePeriod)
+            .attr("x", (d) => x(d.Category) + x.bandwidth() * (i / timePeriods.length))
+            .attr("y", (d) => (d[timePeriod] >= 0) ? y(d[timePeriod]) : y(0))
+            .attr("width", x.bandwidth() / timePeriods.length)
+            .attr("height", (d) => Math.abs(y(d[timePeriod]) - y(0)))
+            .attr("fill", timePeriodColors[timePeriod])
+            .on("mouseover", function (event, d) {
+                // Show value, category, and type on hover
+                const value = d[timePeriod].toFixed(2); // Format value to 2 decimal places
+                const category = d.Category;
+                const type = timePeriod;
+                const xPosition = width / 2; // Position tooltip in the middle
+                const yPosition = padding; // Position tooltip at the top
+                svg.append("text")
+                    .attr("class", "bar-label")
+                    .attr("x", xPosition)
+                    .attr("y", yPosition - 5)
+                    .text(`${category} (${type}): ${value}`)
+                    .style("fill", "black")
+                    .style("font-size", "12px")
+                    .style("text-anchor", "middle");
+            })
+            .on("mouseout", function () {
+                // Remove label when not hovering
+                svg.selectAll(".bar-label").remove();
+            });
     });
 
     // Add X and Y axes
     svg.append("g")
-      .attr("transform", `translate(0,${height - padding})`)
-      .call(d3.axisBottom(x));
+        .attr("transform", `translate(0,${height - padding})`)
+        .call(d3.axisBottom(x));
 
     svg.append("g")
-      .attr("transform", `translate(${padding},0)`)
-      .call(d3.axisLeft(y));
+        .attr("transform", `translate(${padding},0)`)
+        .call(d3.axisLeft(y));
 
     // Add legend
     const legend = svg.append("g")
-      .attr("transform", `translate(${width - padding}, ${padding})`);
+        .attr("transform", `translate(${width - padding}, ${padding})`);
 
     Object.entries(timePeriodColors).forEach(([timePeriod, color], i) => {
-      legend.append("rect")
-        .attr("x", 0)
-        .attr("y", i * 20)
-        .attr("width", 15)
-        .attr("height", 15)
-        .attr("fill", color);
+        legend.append("rect")
+            .attr("x", 0)
+            .attr("y", i * 20)
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("fill", color);
 
-      legend.append("text")
-        .attr("x", 20)
-        .attr("y", i * 20 + 12)
-        .text(timePeriod);
+        legend.append("text")
+            .attr("x", 20)
+            .attr("y", i * 20 + 12)
+            .text(timePeriod);
     });
 
     // Set the text color to black
     d3.selectAll("text").style("fill", "black");
-  }
+}
 
-  function updateBubbleChart(data) {
-      // Select the existing SVG element
-      var svg = d3.select("#bubbleChart").select("svg");
+// Define function to update bubble chart
+function updateBubbleChart(data) {
+    // Select the existing SVG element
+    var svg = d3.select("#bubbleChart").select("svg");
 
-      // If SVG exists, remove all bubbles and legend
-      if (svg) {
-          svg.selectAll("circle").remove();
-          svg.selectAll(".legend").remove();
-          svg.selectAll(".axis").remove();
-      }
+    // If SVG exists, remove all bubbles and legend
+    if (svg) {
+        svg.selectAll("circle").remove();
+        svg.selectAll(".legend").remove();
+        svg.selectAll(".axis").remove();
+    }
 
-      // Convert string values to numbers where necessary
-      data.forEach(function(d) {
-          d.YTD = +d.YTD;
-          d.ExpenseRatio = +d.ExpenseRatio;
-          // Check if NetAssets is a string and contains commas
-          if (typeof d.NetAssets === 'string' && d.NetAssets.includes(',')) {
-              // Remove commas and convert to number
-              d.NetAssets = +d.NetAssets.replace(/,/g, "");
-          } else {
-              // Convert to number
-              d.NetAssets = +d.NetAssets;
-          }
-      });
+    // Convert string values to numbers where necessary
+    data.forEach(function (d) {
+        d.YTD = +d.YTD;
+        d.ExpenseRatio = +d.ExpenseRatio;
+        // Check if NetAssets is a string and contains commas
+        if (typeof d.NetAssets === 'string' && d.NetAssets.includes(',')) {
+            // Remove commas and convert to number
+            d.NetAssets = +d.NetAssets.replace(/,/g, "");
+        } else {
+            // Convert to number
+            d.NetAssets = +d.NetAssets;
+        }
+    });
 
-      // Set up the chart dimensions
-      var margin = { top: 20, right: 20, bottom: 70, left: 70 },
-          width = 800 - margin.left - margin.right,
-          height = 600 - margin.top - margin.bottom;
+    // Set up the chart dimensions
+    var margin = { top: 20, right: 20, bottom: 70, left: 70 },
+        width = 800 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
 
-      // Append SVG to the body if it doesn't exist
-      if (!svg.node()) {
-          svg = d3.select("#bubbleChart")
-              .append("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-      }
+    // Append SVG to the body if it doesn't exist
+    if (!svg.node()) {
+        svg = d3.select("#bubbleChart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    }
 
-      // Define scales for X and Y axes
-      var x = d3.scaleLinear()
-          .domain([0, d3.max(data, function(d) { return d.ExpenseRatio; })])
-          .range([0, width]);
+    // Define scales for X and Y axes
+    var x = d3.scaleLinear()
+        .domain([0, d3.max(data, function (d) { return d.ExpenseRatio; })])
+        .range([0, width]);
 
-      var y = d3.scaleLinear()
-          .domain([0, d3.max(data, function(d) { return d.NetAssets; })])
-          .range([height, 0]);
+    var y = d3.scaleLinear()
+        .domain([0, d3.max(data, function (d) { return d.NetAssets; })])
+        .range([height, 0]);
 
-      // Define X and Y axes
-      var xAxis = d3.axisBottom(x);
-      var yAxis = d3.axisLeft(y);
+    // Define X and Y axes
+    var xAxis = d3.axisBottom(x);
+    var yAxis = d3.axisLeft(y);
 
-      // Add X axis
-      svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis)
-          .append("text")
-          .attr("class", "label")
-          .attr("x", width)
-          .attr("y", -6)
-          .style("text-anchor", "end")
-          .text("Expense Ratio");
+    // Add X axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .append("text")
+        .attr("class", "label")
+        .attr("x", width)
+        .attr("y", -6)
+        .style("text-anchor", "end")
+        .text("Expense Ratio");
 
-      // Add Y axis
-      svg.append("g")
-          .attr("class", "y axis")
-          .call(yAxis)
-          .append("text")
-          .attr("class", "label")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 6)
-          .attr("dy", ".71em")
-          .style("text-anchor", "end")
-          .text("Net Assets");
+    // Add Y axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("class", "label")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Net Assets");
 
-      // Define scale for bubble size
-      var bubbleSize = d3.scaleLinear()
-          .domain([0, d3.max(data, function(d) { return d.YTD; })])
-          .range([5, 30]); // Set range for bubble radius
+    // Define scale for bubble size
+    var bubbleSize = d3.scaleLinear()
+        .domain([0, d3.max(data, function (d) { return d.YTD; })])
+        .range([5, 30]); // Set range for bubble radius
 
-      // Define color scale based on category
-      var color = d3.scaleOrdinal(d3.schemeCategory10);
+    // Define color scale based on category
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      // Add bubbles
-      svg.selectAll("circle")
-          .data(data)
-          .enter()
-          .append("circle")
-          .attr("cx", function(d) { return x(d.ExpenseRatio); })
-          .attr("cy", function(d) { return y(d.NetAssets); })
-          .attr("r", function(d) { return bubbleSize(d.YTD); })
-          .style("fill", function(d) { return color(d.Category); })
-          .style("opacity", 0.7)
-          .style("stroke", "black");
+    // Add bubbles
+    svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return x(d.ExpenseRatio); })
+        .attr("cy", function (d) { return y(d.NetAssets); })
+        .attr("r", function (d) { return bubbleSize(d.YTD); })
+        .style("fill", function (d) { return color(d.Category); })
+        .style("opacity", 0.7)
+        .style("stroke", "black");
 
-      // Add legend
-      var legend = svg.selectAll(".legend")
-          .data(color.domain())
-          .enter().append("g")
-          .attr("class", "legend")
-          .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+    // Add legend
+    var legend = svg.selectAll(".legend")
+        .data(color.domain())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
 
-      legend.append("rect")
-          .attr("x", width - 18)
-          .attr("width", 18)
-          .attr("height", 18)
-          .style("fill", color);
+    legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
 
-      legend.append("text")
-          .attr("x", width - 24)
-          .attr("y", 9)
-          .attr("dy", ".35em")
-          .style("text-anchor", "end")
-          .text(function(d) { return d; });
-  }
+    legend.append("text")
+        .attr("x", width - 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function (d) { return d; });
+}
 
-  function updateDonutChart(data) {
-      // Update donut chart based on filtered data
-      // Remove any existing SVG elements
-      d3.select("#donutChart").select("svg").remove();
+// Define function to update donut chart
+function updateDonutChart(data) {
+    // Your updated donut chart update code here...
+}
 
-      // Set up chart dimensions
-      var width = 800;
-      var height = 600;
-      var radius = Math.min(width, height) / 2;
+// Define function to update tree map
+function updateTreeMap(data) {
+    // Your updated tree map update code here...
+}
 
-      // Define color scale
-      var color = d3.scaleOrdinal(d3.schemeCategory10);
+// Initial rendering of visualizations
+updateBarChart(barChartData);
+updateBubbleChart(bubbleChartData);
+updateDonutChart(barChartData);
+updateTreeMap(barChartData); // Render tree map initially
 
-      // Append SVG for donut chart
-      var svg = d3.select("#donutChart")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .append("g")
-          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-      // Define arc generator
-      var arc = d3.arc()
-          .innerRadius(radius * 0.6)
-          .outerRadius(radius * 0.8);
+     // Define function to update donut chart
+function updateDonutChart(data) {
+    // Data preprocessing and visualization code
+    data.forEach(function(d) {
+        d.NetAssets = +d.NetAssets.replace(/,/g, ""); // Remove commas and convert to number
+        d.MgrTenure = +d.MgrTenure; // Convert MgrTenure to a numeric value
+    });
 
-      // Define pie generator
-      var pie = d3.pie()
-          .value(function(d) { return d.investment; });
+    // Set up chart dimensions
+    var width = 800;
+    var height = 600;
+    var radius = Math.min(width, height) / 2;
 
-      // Aggregate data by category and calculate total net assets for each category
-      var categoryData = Array.from(d3.group(data, d => d.Category), ([key, value]) => ({ category: key, investment: d3.sum(value, d => d.NetAssets) }));
+    // Define color scale
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      // Generate arcs
-      var arcs = svg.selectAll(".arc")
-          .data(pie(categoryData))
-          .enter()
-          .append("g")
-          .attr("class", "arc");
+    // Select the existing SVG element
+    var svg = d3.select("#donutChart").select("svg");
 
-      // Draw arcs
-      arcs.append("path")
-          .attr("d", arc)
-          .attr("fill", function(d, i) { return color(i); });
+    // If SVG exists, remove all elements
+    if (svg) {
+        svg.selectAll("*").remove();
+    }
 
-      // Add text labels
-      arcs.append("text")
-          .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-          .attr("text-anchor", "middle")
-          .text(function(d) {
-              return d.data.category;
-          });
-  }
+    // Append SVG for donut chart
+    svg = d3.select("#donutChart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-  // Initial rendering of visualizations
-  updateBarChart(barChartData);
-  updateBubbleChart(barChartData);
-  updateDonutChart(barChartData);
-});
+    // Define arc generator
+    var arc = d3.arc()
+        .innerRadius(radius * 0.6)
+        .outerRadius(radius * 0.8);
 
-  // Function to go back
-  function goBack() {
-    window.location.href = "menu.html";
-  }
+    // Define pie generator
+    var pie = d3.pie()
+        .value(function(d) { return d.investment; })
+        .sort(null); // Disable sorting for pie slices
 
+    // Initial chart (by category)
+    var categoryData = Array.from(d3.group(data, d => d.Category), ([key, value]) => ({ category: key, investment: d3.sum(value, d => d.NetAssets), count: value.length }));
+    var arcs = svg.selectAll(".arc")
+        .data(pie(categoryData))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", function(d, i) { return color(i); })
+        .on("mouseover", function(event, d) {
+            var tenureData = Array.from(d3.group(data.filter(function(item) { return item.Category === d.data.category; }).filter(function(item) { return item.MgrTenure !== 0; }), d => d.MgrTenure), ([key, value]) => ({ tenure: key, investment: d3.sum(value, d => d.NetAssets) }));
+            tenureData.sort((a, b) => a.tenure - b.tenure);
+
+            svg.selectAll(".arc").remove();
+            var newArcs = svg.selectAll(".arc")
+                .data(pie(tenureData))
+                .enter()
+                .append("g")
+                .attr("class", "arc");
+
+            newArcs.append("path")
+                .attr("d", arc)
+                .attr("fill", function(d, i) { return color(i); });
+
+            newArcs.append("text")
+                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                .attr("text-anchor", "middle")
+                .text(function(d) { return d.data.tenure; });
+
+            svg.select("text.chart-title").text("Manager tenure length for " + d.data.category + " funds");
+
+            svg.select(".counter").remove();
+            var count = d.data.count;
+            svg.append("text")
+                .attr("class", "counter")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("text-anchor", "middle")
+                .style("font-size", "24px")
+                .text("Fund count: " + count);
+        })
+        .on("mouseout", function(event, d) {
+            svg.selectAll(".arc").remove();
+            arcs = svg.selectAll(".arc")
+                .data(pie(categoryData))
+                .enter()
+                .append("g")
+                .attr("class", "arc");
+
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", function(d, i) { return color(i); });
+
+            arcs.append("text")
+                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                .attr("text-anchor", "middle")
+                .text(function(d) { return d.data.category; });
+
+            svg.select("text.chart-title").text("Mutual fund categories");
+
+            svg.select(".counter").remove();
+        });
+
+    // Add label for display type
+    svg.append("text")
+        .attr("class", "chart-title")
+        .attr("x", 0)
+        .attr("y", -height / 2 + 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .text("Mutual fund categories");
+
+    // Add counter in the center
+    var totalCount = d3.sum(categoryData, d => d.count);
+    svg.append("text")
+        .attr("class", "counter")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("text-anchor", "middle")
+        .style("font-size", "24px")
+        .text("Fund count: " + totalCount);
+
+    // Add Category labels
+    arcs.append("text")
+        .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d.data.category; });
+
+    svg.on("mouseleave", function(event) {
+        svg.selectAll(".arc").remove();
+        arcs = svg.selectAll(".arc")
+            .data(pie(categoryData))
+            .enter()
+            .append("g")
+            .attr("class", "arc");
+
+        arcs.append("path")
+            .attr("d", arc)
+            .attr("fill", function(d, i) { return color(i); })
+            .on("mouseover", function(event, d) {
+                var tenureData = Array.from(d3.group(data.filter(function(item) { return item.Category === d.data.category; }).filter(function(item) { return item.MgrTenure !== 0; }), d => d.MgrTenure), ([key, value]) => ({ tenure: key, investment: d3.sum(value, d => d.NetAssets) }));
+                tenureData.sort((a, b) => a.tenure - b.tenure);
+
+                svg.selectAll(".arc").remove();
+
+                var newArcs = svg.selectAll(".arc")
+                    .data(pie(tenureData))
+                    .enter()
+                    .append("g")
+                    .attr("class", "arc");
+
+                newArcs.append("path")
+                    .attr("d", arc)
+                    .attr("fill", function(d, i) { return color(i); });
+
+                newArcs.append("text")
+                    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                    .attr("text-anchor", "middle")
+                    .text(function(d) { return d.data.tenure; });
+
+                svg.select("text.chart-title").text("Manager tenure length for " + d.data.category + " funds");
+
+                svg.select(".counter").remove();
+                var count = d.data.count;
+                svg.append("text")
+                    .attr("class", "counter")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "24px")
+                    .text("Fund count: " + count);
+            });
+
+        arcs.append("text")
+            .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+            .attr("text-anchor", "middle")
+            .text(function(d) { return d.data.category; });
+
+        svg.select("text.chart-title").text("Mutual fund categories");
+
+        svg.select(".counter").remove();
+        svg.append("text")
+            .attr("class", "counter")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text("Fund count: " + totalCount);
+    });
+}
+
+// Define function to update tree map
+function updateTreeMap(data) {
+    // Data preprocessing
+    data.forEach(function(d) {
+        d.NetAssets = +d.NetAssets.replace(/,/g, ""); // Remove commas and convert to number
+    });
+
+    // Set up SVG dimensions
+    const width = 600;
+    const height = 400;
+
+    // Create SVG element
+    const svg = d3.select("#tree-map")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Function to filter data based on category
+    function filterData(category) {
+        if (category === "All") {
+            return data;
+        } else {
+            return data.filter(function(d) {
+                return d.Category === category;
+            });
+        }
+    }
+
+    // Function to update visualization based on selected category
+    function updateVisualization(category) {
+        const filteredData = filterData(category);
+
+        // Filter out data points with Yield as 0
+        const nonZeroYieldData = filteredData.filter(function(d) {
+            return +d.Yield !== 0;
+        });
+
+        // Sort the data by Yield and select top 10
+        const sortedData = nonZeroYieldData.sort((a, b) => b.Yield - a.Yield);
+        const top10Data = sortedData.slice(0, 10);
+
+        console.log("Top 10 data for category", category, ":", top10Data);
+
+        // Define a categorical color scale
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // Set up D3 tree map layout
+        const treemapLayout = d3.treemap()
+            .size([width, height])
+            .padding(1)
+            .round(true);
+
+        // Create hierarchy
+        const root = d3.hierarchy({children: top10Data})
+            .sum(d => d.Yield);
+
+        // Generate treemap layout
+        treemapLayout(root);
+
+        // Create nodes
+        const node = svg.selectAll(".node")
+            .data(root.leaves())
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        // Append rectangles with color based on yield
+        node.append("rect")
+            .attr("class", "tile")
+            .attr("fill", (d, i) => colorScale(i)) // Assign color based on index
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0);
+
+        // Append text labels
+        node.append("text")
+            .attr("class", "text-overlay")
+            .attr("x", 5)
+            .attr("y", 15)
+            .text(d => `${d.data.Symbol} - YLD: ${d.data.Yield}, ER: ${d.data.ExpenseRatio}`);
+
+        // Highlight upon hover
+        node.on("mouseover", function() {
+            d3.select(this).select("rect").classed("highlighted", true);
+        }).on("mouseout", function() {
+            d3.select(this).select("rect").classed("highlighted", false);
+        });
+    }
+
+    // Initial visualization with "All" category selected
+    updateVisualization("All");
+
+    // Event listener for category selection change
+    document.getElementById("category").addEventListener("change", function() {
+        const selectedCategory = this.value;
+        svg.selectAll("*").remove(); // Clear previous visualization
+        updateVisualization(selectedCategory);
+    });
+}
+
+        // Initial rendering of visualizations
+        updateBarChart(barChartData);
+        updateBubbleChart(bubbleChartData);
+        updateDonutChart(barChartData);
+        updateTreeMap(barChartData); // Render tree map initially
+    });
+
+    // Function to go back
+    function goBack() {
+        window.location.href = "menu.html";
+    }
 </script>
 </body>
 </html>
